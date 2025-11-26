@@ -25,3 +25,6 @@ AP → Add Worker → Add Credentials → AI Summary → Share with RP
 See issues labeled `MVP` and `Dev - Setup` in the project board.
 
 Start with #1: Initialize Next.js App in Codespaces# ap-compliance-platform
+
+## Deployment
+Production URL: https://kora-compliance.vercel.app

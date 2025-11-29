@@ -10,6 +10,8 @@ export default function WorkerDetailPage({ params }: { params: Promise<{ id: str
   const [loading, setLoading] = useState(true)
   const [worker, setWorker] = useState<any>(null)
   const [credentials, setCredentials] = useState<any[]>([])
+  const [analyzing, setAnalyzing] = useState(false)
+  const [aiSummary, setAiSummary] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -34,19 +36,60 @@ export default function WorkerDetailPage({ params }: { params: Promise<{ id: str
     loadData()
   }, [id, router])
 
+  async function handleCheckCompliance() {
+    setAnalyzing(true)
+    setAiSummary(null)
+    
+    try {
+      const response = await fetch('/api/analyse-worker', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workerId: id })
+      })
+      
+      const data = await response.json()
+      
+      if (data.summary) {
+        setAiSummary(data.summary)
+      } else {
+        setAiSummary('Error: Unable to analyze compliance')
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      setAiSummary('Error: Failed to check compliance')
+    } finally {
+      setAnalyzing(false)
+    }
+  }
+
   if (loading) return <div className="p-8">Loading...</div>
   if (!worker) return <div className="p-8">Worker not found</div>
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-4xl mx-auto">
-        <Link href="/workers" className="text-blue-600 mb-6 block">Back to Workers</Link>
+        <Link href="/workers" className="text-blue-600 mb-6 block">← Back to Workers</Link>
         
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h1 className="text-3xl font-bold mb-4">{worker.name}</h1>
           <p>Role: {worker.role}</p>
           <p>Email: {worker.email || 'Not provided'}</p>
           <p>Status: {worker.status}</p>
+          
+          <button
+            onClick={handleCheckCompliance}
+            disabled={analyzing}
+            className="mt-4 bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 disabled:bg-gray-400"
+          >
+            {analyzing ? 'Analyzing...' : '🤖 Check Compliance with AI'}
+          </button>
+          
+          {aiSummary && (
+            <div className="mt-4 p-4 bg-blue-50 rounded border border-blue-200">
+              <h3 className="font-bold mb-2">AI Compliance Analysis:</h3>
+              <p className="whitespace-pre-line">{aiSummary}</p>
+            </div>
+          )}
         </div>
 
         <div className="bg-white rounded-lg shadow p-6">

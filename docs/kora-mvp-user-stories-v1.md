@@ -20,7 +20,7 @@ The aged care sector faces significant infrastructure inefficiencies:
 - **The Outcome:** Small APs face unsustainable admin burden, RPs reduce AP engagement due to risk, sector efficiency decreases
 
 ### The Solution: Shared Compliance Infrastructure
-**Upload once, share forever.** Platform becomes the single source of truth that both APs and RPs (and eventually Commission) can trust.
+**Upload once, connect many.** Platform becomes the single source of truth that both APs and RPs (and eventually Commission) can trust.
 
 ### Network Effects:
 1. More APs → More verified workers → RPs have choice
@@ -257,7 +257,7 @@ APs onboard 1-5 workers/month. Need fast entry, COMPLETE checklist showing all 1
 **So that** I have verifiable evidence I can share with multiple RPs without re-uploading
 
 **Background:**
-Workers provide certificates via email/hardcopy. AP scans and uploads once. Current state: Email same PDF to 5 RPs separately. New state: Upload once, share forever. When credentials renew, update once, all RPs see new version.
+Workers provide certificates via email/hardcopy. AP scans and uploads once. Current state: Email same PDF to 5 RPs separately. New state: Upload once, connect many. When credentials renew, update once, all RPs see new version.
 
 **Acceptance Criteria:**
 - [ ] **Initial Upload:**
@@ -1026,7 +1026,7 @@ RPs must maintain copies of evidence for audit trail. Current state: Save email 
 
 ### Quantitative (if pilot):
 - **Time to verify worker compliance:** Target < 2 minutes (vs 2 days)
-- **Number of RPs one AP shares with:** Target 3+ (demonstrates "upload once, share forever")
+- **Number of RPs one AP shares with:** Target 3+ (demonstrates "upload once, connect many")
 - **Credential update propagation:** Target instant visibility (no delays)
 - **AP credential upload time:** Target < 1 minute per credential
 - **RP document download success rate:** Target 95%+
@@ -1138,7 +1138,7 @@ Complete user story specification for 6-week MVP build:
 - 12-minute demo script with data requirements
 
 Key Features:
-✅ Upload once, share forever
+✅ Upload once, connect many
 ✅ Real-time compliance visibility
 ✅ Organisation credential verification
 ✅ Evidence document management

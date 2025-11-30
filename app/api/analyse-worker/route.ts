@@ -1,65 +1,68 @@
 import { NextResponse } from 'next/server'
+import { createClient } from '@/app/lib/supabase-server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import { supabase } from '@/app/lib/supabase'
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 
 export async function POST(request: Request) {
   try {
     const { workerId } = await request.json()
     
+    const supabase = await createClient()
+    
     // Get worker details
-    const { data: worker } = await supabase
+    const { data: worker, error: workerError } = await supabase
       .from('workers')
-      .select('id, name, role')
+      .select('*')
       .eq('id', workerId)
       .single()
     
-    // Get credentials with types for this worker
+    if (workerError || !worker) {
+      return NextResponse.json({ error: 'Worker not found' }, { status: 404 })
+    }
+    
+    // Get worker credentials
     const { data: credentials } = await supabase
-      .from('credentials')
-      .select('*, credential_types(name)')
+      .from('worker_credentials')
+      .select(`
+        *,
+        credential_types (name, required, valid_period_days)
+      `)
       .eq('worker_id', workerId)
     
-    // Prepare data for Gemini
+    // Initialize Gemini
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" })
+    
     const prompt = `
-You are an aged care compliance expert. Analyze this worker's credentials and provide a plain-English compliance summary.
+Analyze the compliance status of this aged care worker:
 
-Worker: ${worker?.name}
-Role: ${worker?.role}
+Worker: ${worker.name}
+Role: ${worker.role}
 
 Credentials:
-${credentials?.map(c => `- ${c.credential_types?.name || 'Unknown'}: Issued ${c.issue_date || 'N/A'}, Expires ${c.expiry_date || 'N/A'}`).join('\n') || 'None'}
+${credentials?.map((c: any) => `- ${c.credential_types?.name || 'Unknown'}: ${c.status} (Expires: ${c.expiry_date || 'N/A'})`).join('\n')}
 
 Required credentials for aged care workers:
 - National Police Check (valid within 3 years)
 - NDIS Worker Screening Check (valid within 5 years)
 - Current CPR Certification (valid within 1 year)
-- Annual Manual Handling Refresher (valid within 1 year)
+- First Aid Certificate (valid within 3 years)
 
-Provide a brief compliance summary (2-3 sentences) in plain English. Use a traffic light system:
-🟢 GREEN: Fully compliant
-🟡 YELLOW: Missing credentials or approaching expiry
-🔴 RED: Critical compliance issues
-
-Format: Start with the emoji, then your summary.
+Provide a brief compliance analysis including:
+1. Overall compliance status
+2. Any missing or expired credentials
+3. Recommended actions
 `
     
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
     const result = await model.generateContent(prompt)
-    const summary = result.response.text()
+    const analysis = result.response.text()
     
+    return NextResponse.json({ analysis })
+    
+  } catch (error: any) {
+    console.error('Analysis error:', error)
     return NextResponse.json({ 
-      summary,
-      worker: worker?.name,
-      credentialCount: credentials?.length || 0
-    })
-    
-  } catch (error) {
-    console.error('Error analyzing worker:', error)
-    return NextResponse.json(
-      { error: 'Failed to analyze worker' },
-      { status: 500 }
-    )
+      error: 'Failed to analyze compliance',
+      details: error.message 
+    }, { status: 500 })
   }
 }

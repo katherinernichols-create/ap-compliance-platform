@@ -1,5 +1,4 @@
 'use client'
-
 import { useEffect, useState } from 'react'
 import { supabase } from '@/app/lib/supabase'
 import { useRouter } from 'next/navigation'
@@ -20,6 +19,7 @@ export default function WorkersPage() {
   useEffect(() => {
     async function loadWorkers() {
       const { data: { user } } = await supabase.auth.getUser()
+      
       if (!user) {
         router.push('/login')
         return
@@ -35,6 +35,7 @@ export default function WorkersPage() {
       } else {
         setWorkers(data || [])
       }
+      
       setLoading(false)
     }
 
@@ -103,5 +104,5 @@ export default function WorkersPage() {
         </div>
       </div>
     </div>
-     )
+  )
 }

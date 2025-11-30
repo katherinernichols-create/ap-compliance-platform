@@ -49,8 +49,8 @@ export default function WorkerDetailPage({ params }: { params: Promise<{ id: str
       
       const data = await response.json()
       
-      if (data.summary) {
-        setAiSummary(data.summary)
+      if (data.analysis) {
+        setAiSummary(data.analysis)
       } else {
         setAiSummary('Error: Unable to analyze compliance')
       }
@@ -81,7 +81,7 @@ export default function WorkerDetailPage({ params }: { params: Promise<{ id: str
             disabled={analyzing}
             className="mt-4 bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 disabled:bg-gray-400"
           >
-            {analyzing ? 'Analyzing...' : '🤖 Check Compliance with AI'}
+            {analyzing ? 'Analyzing...' : 'Check Compliance'}
           </button>
           
           {aiSummary && (

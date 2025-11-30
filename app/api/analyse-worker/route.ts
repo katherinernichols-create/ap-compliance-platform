@@ -33,24 +33,37 @@ export async function POST(request: Request) {
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" })
     
     const prompt = `
-Analyze the compliance status of this aged care worker:
+You are an aged care compliance expert analyzing worker credentials against the Aged Care Act 2024 and Quality Standards (February 2025).
 
 Worker: ${worker.name}
 Role: ${worker.role}
 
-Credentials:
-${credentials?.map((c: any) => `- ${c.credential_types?.name || 'Unknown'}: ${c.status} (Expires: ${c.expiry_date || 'N/A'})`).join('\n')}
+Current Credentials:
+${credentials?.map((c: any) => `- ${c.credential_types?.name || 'Unknown'}: ${c.status} (Expires: ${c.expiry_date || 'N/A'})`).join('\n') || 'None'}
 
-Required credentials for aged care workers:
-- National Police Check (valid within 3 years)
-- NDIS Worker Screening Check (valid within 5 years)
-- Current CPR Certification (valid within 1 year)
-- First Aid Certificate (valid within 3 years)
+MANDATORY REQUIREMENTS (from Quality Standard 2.9.1 and 2.9.6):
 
-Provide a brief compliance analysis including:
-1. Overall compliance status
-2. Any missing or expired credentials
-3. Recommended actions
+**Screening (worker must have ONE of):**
+- NDIS Worker Screening Check (valid 5 years) OR
+- National Police Check (valid 3 years)
+
+**Mandatory Training (annual renewal required):**
+- Current CPR Certification (12 months)
+- Manual Handling Training (12 months)
+- Infection Control Training (12 months)
+- Code of Conduct Training (12 months)
+- SIRS Training (12 months)
+
+**Role-Specific:**
+- Personal Care Assistants: Certificate III in Individual Support
+- Registered Nurses: Current AHPRA Registration (annual)
+
+Provide a brief compliance summary (2-3 sentences) in plain English. Use this traffic light system:
+🟢 GREEN: All mandatory requirements met, credentials current
+🟡 YELLOW: Missing optional credentials OR credentials expiring within 90 days
+🔴 RED: Missing mandatory screening, expired CPR, or other critical compliance gaps
+
+Format: Start with the emoji, then your summary. Be specific about what's missing or expiring.
 `
     
     const result = await model.generateContent(prompt)

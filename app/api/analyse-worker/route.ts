@@ -20,13 +20,20 @@ export async function POST(request: Request) {
     }
     
     // Get worker credentials
-    const { data: credentials } = await supabase
-      .from('worker_credentials')
+    const { data: credentials, error: credError } = await supabase
+      .from('credentials')
       .select(`
         *,
-        credential_types (name, required, valid_period_days)
+        credential_types (name, category)
       `)
       .eq('worker_id', workerId)
+    
+    // Add error logging
+    if (credError) {
+      console.error('Credential fetch error:', credError)
+    }
+    
+    console.log('Found credentials:', credentials?.length || 0, credentials)
     
     // Initialize Gemini
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
